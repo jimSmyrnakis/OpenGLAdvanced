@@ -2,6 +2,7 @@
 
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
+#include <glm/glm.hpp>
 #include <iostream>
 
 int main(void){
@@ -43,8 +44,6 @@ int main(void){
 
     GLuint     bufferID ;
     GLushort   numOfBuffers = 1;
-    GLenum     bufferTarget = GL_ARRAY_BUFFER;
-    GLenum     bufferUssage = GL_STATIC_DRAW ;
     float positions[6] = {
          -0.5f , -0.5f ,
          +0.5f , -0.5f ,
@@ -56,10 +55,10 @@ int main(void){
     /*Creates a buffer id so it can handle it for sending to gpu VRAM */
     glGenBuffers(numOfBuffers , &bufferID);
     /*Binds or otherwise we could say choose this buffer and what form of buffer this is */
-    glBindBuffer(bufferTarget , bufferID);
+    glBindBuffer(GL_ARRAY_BUFFER , bufferID);
     /*all this good but we need to specify what the size type and data are (right? :) ) 
       The glDataBuffer does that with the buffer we bind with */
-    glBufferData( bufferTarget , bufferSize , positions , bufferUssage );
+    glBufferData(GL_ARRAY_BUFFER , bufferSize , positions , GL_STATIC_DRAW );
     /*bufferUssage is static (buffer gona setup once and used repeatetly ) and draw (buffer is specified for drawing on the screen - so OpenGL says this shader results
       in for example the vram area that is for the drawing pixels etc. )*/
 
