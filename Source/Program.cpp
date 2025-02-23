@@ -4,6 +4,23 @@
 #include <glad/gl.h>
 #include <glm/glm.hpp>
 #include <iostream>
+#include <string>
+#include <fstream>
+
+#include "Systems/Renderer/Shader/Shader.hpp"
+
+void ReadShader(const std::string ShaderPath , std::string& source ){
+    std::ifstream ShaderFile(ShaderPath, std::ios::in | std::ios::binary);
+    if (!ShaderFile)
+        ASSERT(0 , "Shader File can't loaded !!!" );
+    std::string* ShaderCode = new std::string();
+    ShaderFile.seekg(0 , std::ios::end);
+    ShaderCode->resize(ShaderFile.tellg());
+    ShaderFile.seekg(0 , std::ios::beg);
+    ShaderFile.read(&((*ShaderCode)[0]) , ShaderCode->size());
+    ShaderFile.close();
+    source = *ShaderCode;
+}
 
 int main(void){
     std::cout << "Hello World (glfw is compiled , linked and translate to executable ) :) !!!" << std::endl;
@@ -44,7 +61,7 @@ int main(void){
 
     GLuint     bufferID ;
     GLushort   numOfBuffers = 1;
-    float positions[6] = {
+    float positions[] = {
          -0.5f , -0.5f ,
          +0.5f , -0.5f ,
          +0.0f , +0.5f 
@@ -62,6 +79,12 @@ int main(void){
     /*bufferUssage is static (buffer gona setup once and used repeatetly ) and draw (buffer is specified for drawing on the screen - so OpenGL says this shader results
       in for example the vram area that is for the drawing pixels etc. )*/
 
+    Game::Shader shad ;
+    std::string src ;
+    ReadShader("./Assets/Shaders/Shader1.glsl", src );
+    shad.SetShader(src.c_str());
+
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -71,6 +94,7 @@ int main(void){
         
 
         /*Make a triangle */
+        shad.Bind();    
         glDrawArrays(GL_TRIANGLES , 0 , 3);
         /*start from vertex 0 (the two first float positions ) and count three next */
 

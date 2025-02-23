@@ -13,20 +13,42 @@ AssimpInc= ./assimp/include
 GladLib= ./Glad/Library/Linux/x86_64/Debug
 GLFWLib= ./GLFW/build/src
 
-#g++ Flags 
-FlagsGpp= -L$(GladLib) -L$(GLFWLib) -I$(GLFWInc) -I$(GLMInc) -I$(AssimpInc) -I$(GladInc) -g -lglad -lglfw
+#includes
+Incs= -I$(GLFWInc) -I$(GLMInc) -I$(GladInc) -I$(SrcDir)
 
-all: test 
+#libraries
+libs= -L$(GladLib) -L$(GLFWLib) -lglad -lglfw
+#g++ common Flags
+CommonFlags= -g $(Incs)
+#g++ Final Flags 
+FlagsGpp=  $(libs) $(CommonFlags) -lglad -lglfw -lassimp
+
+ExecFiles= $(ExeDir)/Game
+BinnFiles= $(BinDir)/Program.o $(BinDir)/Defs.o $(BinDir)/Shader.o $(BinDir)/Model.o
+
+all: Final
 	echo "Finish..."
 
-test: $(SrcDir)/test.cpp 
-	g++ -o $(ExeDir)/test $(SrcDir)/test.cpp $(FlagsGpp) 
 
-ExecFiles= $(ExeDir)/test
-BinnFiles= 
+Final: Program.o Defs.o Shader.o Model.o
+	g++ $(BinnFiles) -o $(ExeDir)/Game $(FlagsGpp)
 
-execute: $(ExecFiles)
-	$(ExeDir)/test 
+	
+Program.o: $(SrcDir)/Program.cpp 
+	g++ -c $(SrcDir)/Program.cpp -o $(BinDir)/Program.o  $(CommonFlags) 
+
+Defs.o: $(SrcDir)/Defs.cpp
+	g++ -c $(SrcDir)/Defs.cpp -o $(BinDir)/Defs.o $(CommonFlags) 
+
+Shader.o: $(SrcDir)/Systems/Renderer/Shader/Shader.cpp 
+	g++ -c $(SrcDir)/Systems/Renderer/Shader/Shader.cpp -o $(BinDir)/Shader.o $(CommonFlags) 
+
+Model.o: $(SrcDir)/Systems/Renderer/Model/Model.cpp 
+	g++ -c $(SrcDir)/Systems/Renderer/Model/Model.cpp -o $(BinDir)/Model.o $(CommonFlags) 
+
+
+executable: $(ExecFiles)
+	$(ExeDir)/Game  
 
 clear:
 	rm -rf $(ExecFiles) $(BinnFiles)

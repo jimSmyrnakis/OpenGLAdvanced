@@ -1,10 +1,3 @@
 #!/bin/bash
 
-git clone https://github.com/Microsoft/vcpkg.git
-cd vcpkg
-./bootstrap-vcpkg.sh
-./vcpkg integrate install
-vcpkg install assimp
-#cd ./assimp
-#cmake CMakeLists.txt 
-#cd ../
+sudo apt install assimp-utils libassimp-dev libassimp5
