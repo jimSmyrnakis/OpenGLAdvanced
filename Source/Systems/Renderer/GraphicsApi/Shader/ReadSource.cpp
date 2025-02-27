@@ -44,6 +44,10 @@ std::unordered_map<GLenum , std::string> SplitShader(const std::string& ShaderSo
         
     }
 
+    printf("========Vertex Shader=========\n%s\n" , spliter[GL_VERTEX_SHADER].c_str());
+    //printf("========Geometry Shader=======\n%s\n" , spliter[GL_GEOMETRY_SHADER].c_str());
+    printf("========Fragment Shader=======\n%s\n" , spliter[GL_FRAGMENT_SHADER].c_str());
+
 
     return spliter;
 }

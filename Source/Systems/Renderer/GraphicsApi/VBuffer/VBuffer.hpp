@@ -20,7 +20,7 @@ namespace Game{
             void Bind(void) const ;
             void Unbind(void) const ;
 
-            VertexLayout& GetLayout(void) const;
+            VertexLayout GetLayout(void) const;
             void SetLayout(const VertexLayout& layout) ;
 
         private:

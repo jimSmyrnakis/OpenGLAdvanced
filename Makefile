@@ -24,13 +24,18 @@ CommonFlags= -g $(Incs)
 FlagsGpp=  $(libs) $(CommonFlags) -lglad -lglfw -lassimp
 
 ExecFiles= $(ExeDir)/Game
-BinnFiles= $(BinDir)/Program.o $(BinDir)/Defs.o $(BinDir)/Shader.o $(BinDir)/Model.o
+BinnFiles= \
+$(BinDir)/Program.o $(BinDir)/Defs.o 	 \
+$(BinDir)/Shader.o $(BinDir)/Model.o 	 \
+$(BinDir)/VBuffer.o $(BinDir)/IBuffer.o  \
+$(BinDir)/VLayout.o $(BinDir)/VABuffer.o \
+$(BinDir)/FBuffer.o
 
 all: Final
 	echo "Finish..."
 
 
-Final: Program.o Defs.o Shader.o Model.o
+Final: Program.o Defs.o Shader.o IBuffer.o VBuffer.o Model.o VLayout.o VABuffer.o FBuffer.o
 	g++ $(BinnFiles) -o $(ExeDir)/Game $(FlagsGpp)
 
 	
@@ -40,15 +45,30 @@ Program.o: $(SrcDir)/Program.cpp
 Defs.o: $(SrcDir)/Defs.cpp
 	g++ -c $(SrcDir)/Defs.cpp -o $(BinDir)/Defs.o $(CommonFlags) 
 
-Shader.o: $(SrcDir)/Systems/Renderer/Shader/Shader.cpp 
-	g++ -c $(SrcDir)/Systems/Renderer/Shader/Shader.cpp -o $(BinDir)/Shader.o $(CommonFlags) 
+Shader.o: $(SrcDir)/Systems/Renderer/GraphicsApi/Shader/Shader.cpp 
+	g++ -c $(SrcDir)/Systems/Renderer/GraphicsApi/Shader/Shader.cpp -o $(BinDir)/Shader.o $(CommonFlags) 
 
-Model.o: $(SrcDir)/Systems/Renderer/Model/Model.cpp 
-	g++ -c $(SrcDir)/Systems/Renderer/Model/Model.cpp -o $(BinDir)/Model.o $(CommonFlags) 
+VLayout.o: $(SrcDir)/Systems/Renderer/GraphicsApi/VBuffer/VLayout.cpp 
+	g++ -c $(SrcDir)/Systems/Renderer/GraphicsApi/VBuffer/VLayout.cpp -o $(BinDir)/VLayout.o $(CommonFlags) 
+
+VBuffer.o: $(SrcDir)/Systems/Renderer/GraphicsApi/VBuffer/VBuffer.cpp 
+	g++ -c $(SrcDir)/Systems/Renderer/GraphicsApi/VBuffer/VBuffer.cpp -o $(BinDir)/VBuffer.o $(CommonFlags) 
+
+IBuffer.o: $(SrcDir)/Systems/Renderer/GraphicsApi/IBuffer/IBuffer.cpp 
+	g++ -c $(SrcDir)/Systems/Renderer/GraphicsApi/IBuffer/IBuffer.cpp -o $(BinDir)/IBuffer.o $(CommonFlags) 
+
+VABuffer.o: $(SrcDir)/Systems/Renderer/GraphicsApi/VABuffer/VABuffer.cpp 
+	g++ -c  $(SrcDir)/Systems/Renderer/GraphicsApi/VABuffer/VABuffer.cpp -o $(BinDir)/VABuffer.o $(CommonFlags) -Wno-int-to-pointer-cast
+
+FBuffer.o: $(SrcDir)/Systems/Renderer/GraphicsApi/FBuffer/FBuffer.cpp 
+	g++ -c  $(SrcDir)/Systems/Renderer/GraphicsApi/FBuffer/FBuffer.cpp -o $(BinDir)/FBuffer.o $(CommonFlags) 
+
+Model.o: $(SrcDir)/Model/Model.cpp 
+	g++ -c $(SrcDir)/Model/Model.cpp -o $(BinDir)/Model.o $(CommonFlags) 
 
 
 executable: $(ExecFiles)
-	$(ExeDir)/Game  
+	gdb $(ExeDir)/Game  
 
 clear:
 	rm -rf $(ExecFiles) $(BinnFiles)

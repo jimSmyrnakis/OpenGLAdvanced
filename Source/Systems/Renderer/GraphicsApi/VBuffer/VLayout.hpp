@@ -21,6 +21,7 @@ namespace Game{
         Bool 
     };
 
+    u32 SizeOfShaderDataType(ShaderDataType type);
     GLenum ShaderDataTypeToOpenGLType(ShaderDataType type);
 
     struct VertexAttribute{
@@ -30,6 +31,7 @@ namespace Game{
         bool            Normallized;
 
         VertexAttribute( ShaderDataType type , bool Norm = true);
+        VertexAttribute(void) = default;
 
         u32 GetComponentCount(void) const;
     };

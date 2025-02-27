@@ -7,7 +7,12 @@
 #include <string>
 #include <fstream>
 
-#include "Systems/Renderer/Shader/Shader.hpp"
+#include "Systems/Renderer/GraphicsApi/Shader/Shader.hpp"
+#include "Systems/Renderer/GraphicsApi/VBuffer/VBuffer.hpp"
+#include "Systems/Renderer/GraphicsApi/VBuffer/VLayout.hpp"
+#include "Systems/Renderer/GraphicsApi/IBuffer/IBuffer.hpp"
+#include "Systems/Renderer/GraphicsApi/VABuffer/VABuffer.hpp"
+#include "Systems/Renderer/GraphicsApi/FBuffer/FBuffer.hpp"
 
 void ReadShader(const std::string ShaderPath , std::string& source ){
     std::ifstream ShaderFile(ShaderPath, std::ios::in | std::ios::binary);
@@ -59,44 +64,83 @@ int main(void){
     }
 
 
-    GLuint     bufferID ;
-    GLushort   numOfBuffers = 1;
+    
     float positions[] = {
          -0.5f , -0.5f ,
          +0.5f , -0.5f ,
          +0.0f , +0.5f 
     };
-    GLsizeiptr bufferSize = sizeof(positions);
-    // size is in bytes 
 
-    /*Creates a buffer id so it can handle it for sending to gpu VRAM */
-    glGenBuffers(numOfBuffers , &bufferID);
-    /*Binds or otherwise we could say choose this buffer and what form of buffer this is */
-    glBindBuffer(GL_ARRAY_BUFFER , bufferID);
-    /*all this good but we need to specify what the size type and data are (right? :) ) 
-      The glDataBuffer does that with the buffer we bind with */
-    glBufferData(GL_ARRAY_BUFFER , bufferSize , positions , GL_STATIC_DRAW );
-    /*bufferUssage is static (buffer gona setup once and used repeatetly ) and draw (buffer is specified for drawing on the screen - so OpenGL says this shader results
-      in for example the vram area that is for the drawing pixels etc. )*/
+    Game::u32  indices[] = {
+        0 , 1 , 2
+    };
 
-    Game::Shader shad ;
+    Game::VBuffer           vertex_buffer;
+    Game::IBuffer           index_buffer ;
+    Game::FBuffer           frame_buffer ;
+    Game::VABuffer          va_buffer    ;
+    Game::Shader            shader       ;
+    Game::VertexLayout      layout       ;
+    Game::VertexAttribute   attribute    ;
+    
+    //Set Attribute
+    attribute.Type          = Game::ShaderDataType::Float2;
+    attribute.Size          = Game::SizeOfShaderDataType(attribute.Type);
+    attribute.Normallized   = true;
+
+    //Set Layout
+    layout.AddAttribute(attribute);
+
+    //Set Vertex buffer layout
+    vertex_buffer.SetLayout(layout);
+    //Set Vertex Buffer data
+    vertex_buffer.SetData(positions , sizeof(positions));
+    
+    //Set Index Buffer
+    index_buffer.SetData(indices , sizeof(indices));
+
+    //Set Vertex Array Buffer , add Vertex Buffer
+    va_buffer.AddVertexBuffer(vertex_buffer);
+    //Set Vertex Array Buffer , set Index Buffer
+    va_buffer.SetIndexBuffer(index_buffer);
+
+
+    //Read Shader Source Code from file and set to the Shader class
     std::string src ;
     ReadShader("./Assets/Shaders/Shader1.glsl", src );
-    shad.SetShader(src.c_str());
+    shader.SetShader(src.c_str());
 
+    //Set Frame Buffer and cReate
+    frame_buffer.SetColorBuffer({.r = 1.0f , .g = 0.1f , .b = 0.1f , .a = 1.0f} ,  Game::ImageFormat::RGBA8  );
+    frame_buffer.SetDepthBuffer(1.0f , Game::DepthFormat::DEPTH24);
+    frame_buffer.SetSize(1000 , 1000);
+    frame_buffer.Create();
+    frame_buffer.Bind();
+    glViewport(0,0,100,100);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
-        /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
+        Game::i32 wWidth , wHeight;
+        glfwGetWindowSize(window , &wWidth , &wHeight);
+        //GLCALL( glViewport(0 , 0 , wWidth , wHeight) );
+        /* Clear Buffer's */
+        frame_buffer.Clear();
+        
 
         
 
-        /*Make a triangle */
-        shad.Bind();    
-        glDrawArrays(GL_TRIANGLES , 0 , 3);
+        /*Set Graphics State */
+        vertex_buffer.Bind();
+        index_buffer.Bind();
+        va_buffer.Bind();
+        shader.Bind();    
+        //Draw elements
+        GLCALL( glDrawElements(GL_TRIANGLES , sizeof(indices) / sizeof(Game::u32) , GL_UNSIGNED_INT , nullptr) );
         /*start from vertex 0 (the two first float positions ) and count three next */
+        
+        //Before Swaping Color Buffers Copy the Image from the off screen color buffer
+        frame_buffer.Copy(0 , 0 , wWidth , wHeight);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);

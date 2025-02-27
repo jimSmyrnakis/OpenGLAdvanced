@@ -12,12 +12,13 @@ namespace Game{
                 ASSERT(0 , "Unsupported Shader type !!!");
                 return 0;
         }
-
-        i32 shad = glCreateShader(ShaderType);
+        
+        i32 shad;
+        GLCALL( shad = glCreateShader(ShaderType) );
         /*Create The Shader Object*/
-        glShaderSource(shad, 1, &src, NULL);
+        GLCALL( glShaderSource(shad, 1, &src, 0) );
         /*Set the source to the Shader Object */
-        glCompileShader(shad);
+        GLCALL( glCompileShader(shad) );
         /*Compile the Shader */
         i32 ShaderCompiled;
         glGetShaderiv(shad, GL_COMPILE_STATUS, &ShaderCompiled);
@@ -38,6 +39,7 @@ namespace Game{
     void LinkProgram(const char* src , u32 programId ){
         std::unordered_map<GLenum, std::string> Shads = SplitShader(std::string(src));
         u32 ShadersIds[3];
+        
 
         ShadersIds[0] = CompileShader(Shads[GL_VERTEX_SHADER].c_str()   , GL_VERTEX_SHADER);
         auto it = Shads.find(GL_GEOMETRY_SHADER);
@@ -47,14 +49,15 @@ namespace Game{
             ShadersIds[1] = 0;
         ShadersIds[2] = CompileShader(Shads[GL_FRAGMENT_SHADER].c_str() , GL_FRAGMENT_SHADER);
 
+        
         /*Attach all shaders*/
-        for (int i = 0; i < Shads.size(); i++){
+        for (int i = 0; i < 3; i++){
             if (ShadersIds[i] == 0)
-                break;
-            glAttachShader(programId , ShadersIds[i] );
+                continue;
+            GLCALL( glAttachShader(programId , ShadersIds[i] ) );
         }
 
-        glLinkProgram(programId);
+        GLCALL( glLinkProgram(programId) );
         GLint program_linked;
         glGetProgramiv(programId, GL_LINK_STATUS, &program_linked);
         if (program_linked != GL_TRUE)
@@ -64,6 +67,16 @@ namespace Game{
             glGetProgramInfoLog(programId, 1024, &log_length, message);
             ASSERT(0 , message);
         }
+
+        /*Delete and Detach Shader's*/
+        for (int i = 0; i < Shads.size(); i++){
+            if (ShadersIds[i] == 0)
+                break;
+
+            GLCALL( glDetachShader(programId , ShadersIds[i] ) );    
+            GLCALL( glDeleteShader(ShadersIds[i]) );
+        }
+
 
     }
 }
