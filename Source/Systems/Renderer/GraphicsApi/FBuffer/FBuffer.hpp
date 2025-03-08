@@ -1,30 +1,9 @@
 #pragma once
 #include <Defs.hpp>
-
+#include "../Format/Format.hpp"
 namespace Game{
     
-    enum class ImageFormat{
-        RGBA8   , 
-        RGBA4   , 
-        RGBA2   , 
-        RGB8    , 
-        RGB4    , 
-        RGB2 
-    };
-
-    u32 GetOpenGLImageFormat(ImageFormat format);
-
-    enum class DepthFormat{
-        DEPTH16 , DEPTH24 , DEPTH32
-    };
-
-    u32 GetOpenGLDepthFormat(DepthFormat format);
-
-    enum class Filter{
-        LINEAR , NEAREST
-    };
-
-    u32 GetOpenGLFilter(Filter filter);
+    
 
 
 

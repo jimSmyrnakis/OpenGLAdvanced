@@ -41,7 +41,7 @@ int main(void){
 
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(1000, 1000, "Hello World", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -66,13 +66,15 @@ int main(void){
 
     
     float positions[] = {
-         -0.5f , -0.5f ,
-         +0.5f , -0.5f ,
-         +0.0f , +0.5f 
+         -1.0f , -1.0f ,
+         +1.0f , -1.0f ,
+         -1.0f , +1.0f ,
+         +1.0f , +1.0f
     };
 
     Game::u32  indices[] = {
-        0 , 1 , 2
+        0 , 1 , 2 ,
+        1 , 2 , 3
     };
 
     Game::VBuffer           vertex_buffer;
@@ -111,16 +113,19 @@ int main(void){
     shader.SetShader(src.c_str());
 
     //Set Frame Buffer and cReate
-    frame_buffer.SetColorBuffer({.r = 1.0f , .g = 0.1f , .b = 0.1f , .a = 1.0f} ,  Game::ImageFormat::RGBA8  );
+    frame_buffer.SetColorBuffer({.r = 1.0f , .g = 0.1f , .b = 0.1f , .a = 0.3f} ,  Game::ImageFormat::RGBA8  );
     frame_buffer.SetDepthBuffer(1.0f , Game::DepthFormat::DEPTH24);
     frame_buffer.SetSize(1000 , 1000);
     frame_buffer.Create();
     frame_buffer.Bind();
-    glViewport(0,0,100,100);
+    glViewport(0,0,1000,1000);
+    glEnable(GL_DITHER);
 
     /* Loop until the user closes the window */
+    glfwSwapInterval(2);
     while (!glfwWindowShouldClose(window))
     {
+        double time = glfwGetTime();
         Game::i32 wWidth , wHeight;
         glfwGetWindowSize(window , &wWidth , &wHeight);
         //GLCALL( glViewport(0 , 0 , wWidth , wHeight) );
@@ -142,11 +147,14 @@ int main(void){
         //Before Swaping Color Buffers Copy the Image from the off screen color buffer
         frame_buffer.Copy(0 , 0 , wWidth , wHeight);
 
+        
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
-
+        
         /* Poll for and process events */
         glfwPollEvents();
+        time = glfwGetTime() - time;
+        fprintf(stdout , "Frame Time : %lf\n" , time);
     }
 
     glfwTerminate();
