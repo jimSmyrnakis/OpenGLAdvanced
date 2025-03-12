@@ -36,7 +36,7 @@ namespace Game{
                  or be able to see what is created */
             void SetSize(u32 Width , u32 Height);
             void SetDepthBuffer( float ClearValue , DepthFormat format );
-            void SetColorBuffer(const Color32F& ClearColor , ImageFormat format);
+            void SetColorBuffer(const Color32F& ClearColor , TextureInternalFormat format);
             /*These methods do not change the render buffer's size's of data or allocate them for first time 
               but they just set the desire size's of data for the render buffer's . It is the create method 
               that do the opengl calls to allocate the new render buffer's and is responsible for deleting 
@@ -47,7 +47,7 @@ namespace Game{
             float       GetClearDepth(void)     const;
             DepthFormat GetDepthFormat(void)    const;
             Color32F    GetClearColor(void)     const;
-            ImageFormat GetColorForamt(void)    const;
+            TextureInternalFormat GetColorForamt(void)    const;
             /*Simple function's that return the format's that last set , that is not mean that they have applied */
 
         
@@ -89,7 +89,7 @@ namespace Game{
             // Frame Buffer , the Color buffer id of it . Is set by default to zero that means no 
             // color buffer is generated 
             Color32F        m_BackGround; // RGBA default color buffer clear color
-            ImageFormat     m_CFormat; // Image Format for the Color Buffer 
+            TextureInternalFormat     m_CFormat; // Image Format for the Color Buffer 
         
         private: /* Variables relative to the Depth Buffer of the Frame Buffer */
 

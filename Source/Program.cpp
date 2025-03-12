@@ -1,5 +1,7 @@
 #define GLFW_INCLUDE_NONE
 
+
+
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
 #include <glm/glm.hpp>
@@ -13,6 +15,11 @@
 #include "Systems/Renderer/GraphicsApi/IBuffer/IBuffer.hpp"
 #include "Systems/Renderer/GraphicsApi/VABuffer/VABuffer.hpp"
 #include "Systems/Renderer/GraphicsApi/FBuffer/FBuffer.hpp"
+#include "Systems/Renderer/GraphicsApi/Texture/Texture2D.hpp"
+
+//#include "TextureReader.hpp"
+
+uint32_t TiffTexture[300][300];
 
 void ReadShader(const std::string ShaderPath , std::string& source ){
     std::ifstream ShaderFile(ShaderPath, std::ios::in | std::ios::binary);
@@ -27,10 +34,17 @@ void ReadShader(const std::string ShaderPath , std::string& source ){
     source = *ShaderCode;
 }
 
+
+
 int main(void){
     std::cout << "Hello World (glfw is compiled , linked and translate to executable ) :) !!!" << std::endl;
     std::cin.get();
     
+    for (int i = 0; i < 300 ; i++){
+        for (int j =0 ; j < 300 ; j++){
+            TiffTexture[i][j] = 0xFF00FFFF;
+        }
+    }
 
     GLFWwindow* window;
 
@@ -66,10 +80,10 @@ int main(void){
 
     
     float positions[] = {
-         -1.0f , -1.0f ,
-         +1.0f , -1.0f ,
-         -1.0f , +1.0f ,
-         +1.0f , +1.0f
+         -1.0f , -1.0f , 0.0f , 1.0f , 
+         +1.0f , -1.0f , 1.0f , 1.0f ,
+         -1.0f , +1.0f , 0.0f , 0.0f ,
+         +1.0f , +1.0f , 1.0f , 0.0f
     };
 
     Game::u32  indices[] = {
@@ -79,19 +93,30 @@ int main(void){
 
     Game::VBuffer           vertex_buffer;
     Game::IBuffer           index_buffer ;
-    Game::FBuffer           frame_buffer ;
+    //Game::FBuffer           frame_buffer ;
     Game::VABuffer          va_buffer    ;
     Game::Shader            shader       ;
     Game::VertexLayout      layout       ;
-    Game::VertexAttribute   attribute    ;
+    Game::VertexAttribute   XYAttribute    ;
+    Game::VertexAttribute   UVAttribute  ;
+    Game::Texture2D         texture(0 , {.Width = 300 , .Height= 300 , .Format = Game::TextureInternalFormat::RGBA8})      ;
+
+    texture.SetSubImage((void*)TiffTexture , 0, 0, 300 , 300 , Game::TextureExternalFormat::RGBA8);
     
-    //Set Attribute
-    attribute.Type          = Game::ShaderDataType::Float2;
-    attribute.Size          = Game::SizeOfShaderDataType(attribute.Type);
-    attribute.Normallized   = true;
+    
+    //Set XY Attribute
+    XYAttribute.Type          = Game::ShaderDataType::Float2;
+    XYAttribute.Size          = Game::SizeOfShaderDataType(XYAttribute.Type);
+    XYAttribute.Normallized   = true;
+
+    //Set UV Attribute
+    UVAttribute.Type          = Game::ShaderDataType::Float2;
+    UVAttribute.Size          = Game::SizeOfShaderDataType(UVAttribute.Type);
+    UVAttribute.Normallized   = true;
 
     //Set Layout
-    layout.AddAttribute(attribute);
+    layout.AddAttribute(XYAttribute);
+    layout.AddAttribute(UVAttribute);
 
     //Set Vertex buffer layout
     vertex_buffer.SetLayout(layout);
@@ -113,16 +138,16 @@ int main(void){
     shader.SetShader(src.c_str());
 
     //Set Frame Buffer and cReate
-    frame_buffer.SetColorBuffer({.r = 1.0f , .g = 0.1f , .b = 0.1f , .a = 0.3f} ,  Game::ImageFormat::RGBA8  );
-    frame_buffer.SetDepthBuffer(1.0f , Game::DepthFormat::DEPTH24);
-    frame_buffer.SetSize(1000 , 1000);
-    frame_buffer.Create();
-    frame_buffer.Bind();
+    //frame_buffer.SetColorBuffer({.r = 1.0f , .g = 1.0f , .b = 0.1f , .a = 0.3f} ,  Game::TextureInternalFormat::RGBA8  );
+    //frame_buffer.SetDepthBuffer(1.0f , Game::DepthFormat::DEPTH24);
+    //frame_buffer.SetSize(1000 , 1000);
+    //frame_buffer.Create();
+    //frame_buffer.Bind();
     glViewport(0,0,1000,1000);
     glEnable(GL_DITHER);
 
     /* Loop until the user closes the window */
-    glfwSwapInterval(2);
+    glfwSwapInterval(1);
     while (!glfwWindowShouldClose(window))
     {
         double time = glfwGetTime();
@@ -130,22 +155,24 @@ int main(void){
         glfwGetWindowSize(window , &wWidth , &wHeight);
         //GLCALL( glViewport(0 , 0 , wWidth , wHeight) );
         /* Clear Buffer's */
-        frame_buffer.Clear();
+        //frame_buffer.Clear();
         
-
-        
+        glClearColor(0,0,0,1);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         /*Set Graphics State */
         vertex_buffer.Bind();
         index_buffer.Bind();
         va_buffer.Bind();
-        shader.Bind();    
+        shader.Bind();
+        shader.SetUniform("u_Texture" , texture.GetUnit());
+        texture.Bind();
         //Draw elements
         GLCALL( glDrawElements(GL_TRIANGLES , sizeof(indices) / sizeof(Game::u32) , GL_UNSIGNED_INT , nullptr) );
         /*start from vertex 0 (the two first float positions ) and count three next */
         
         //Before Swaping Color Buffers Copy the Image from the off screen color buffer
-        frame_buffer.Copy(0 , 0 , wWidth , wHeight);
+        //frame_buffer.Copy(0 , 0 , wWidth , wHeight);
 
         
         /* Swap front and back buffers */

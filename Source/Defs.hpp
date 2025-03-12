@@ -17,6 +17,9 @@ namespace Game{
 
         typedef  int64_t i64;
         typedef uint64_t u64;
+
+        typedef void* (*alloc)(size_t size);
+        typedef void  (*dalloc)(void* ptr);  
 }
 
 #define __break_point_ asm("int3")

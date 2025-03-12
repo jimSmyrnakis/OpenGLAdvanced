@@ -20,7 +20,7 @@ namespace Game{
                 //color buffer 
                 m_BackGround.r = m_BackGround.g = m_BackGround.b = 0.1f;
                 m_BackGround.a = 1.0f;
-                m_CFormat      = ImageFormat::RGB8;
+                m_CFormat      = TextureInternalFormat::RGB8;
                 m_ColorBufferId= 0; // set no color buffer yet
 
                 //depth buffer
@@ -87,7 +87,7 @@ namespace Game{
                 m_ClearDepth = ClearValue;
                 m_DFormat    = format;
             }
-            void FBuffer::SetColorBuffer(const Color32F& ClearColor , ImageFormat format){
+            void FBuffer::SetColorBuffer(const Color32F& ClearColor , TextureInternalFormat format){
                 m_BackGround = ClearColor ;
                 m_CFormat    = format     ;
             }
@@ -101,7 +101,7 @@ namespace Game{
             float       FBuffer::GetClearDepth(void)     const { return m_ClearDepth; }
             DepthFormat FBuffer::GetDepthFormat(void)    const { return m_DFormat; }
             Color32F    FBuffer::GetClearColor(void)     const { return m_BackGround; }
-            ImageFormat FBuffer::GetColorForamt(void)    const { return m_CFormat; }
+            TextureInternalFormat FBuffer::GetColorForamt(void)    const { return m_CFormat; }
             /*Simple function's that return the format's that last set , that is not mean that they have applied */
 
             
@@ -139,7 +139,7 @@ namespace Game{
                 ASSERT(m_Width <= GL_MAX_RENDERBUFFER_SIZE , "Width is out of bounds !!!");
                 ASSERT(m_Height <= GL_MAX_RENDERBUFFER_SIZE , "Height is out of Bounds !!!");
                 //Set the new Storage of this color buffer
-                GLCALL( glRenderbufferStorage(GL_RENDERBUFFER , GetOpenGLImageFormat(m_CFormat) , m_Width , m_Height ) );
+                GLCALL( glRenderbufferStorage(GL_RENDERBUFFER , GetOpenGLInternalTextureFormat(m_CFormat) , m_Width , m_Height ) );
                 //Attach the new Render Buffer to the Color buffer
                 GLCALL( glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER , GL_COLOR_ATTACHMENT0 , GL_RENDERBUFFER , m_ColorBufferId) );
                 
